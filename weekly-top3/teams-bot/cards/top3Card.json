@@ -1,0 +1,51 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Weekly Top 3",
+      "weight": "Bolder",
+      "size": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "What are your top 3 things this week? One per box.",
+      "wrap": true,
+      "isSubtle": true
+    },
+    {
+      "type": "Input.Text",
+      "id": "item1",
+      "label": "1.",
+      "isRequired": true,
+      "errorMessage": "Enter at least one item"
+    },
+    {
+      "type": "Input.Text",
+      "id": "item2",
+      "label": "2."
+    },
+    {
+      "type": "Input.Text",
+      "id": "item3",
+      "label": "3."
+    },
+    {
+      "type": "Input.Text",
+      "id": "blockers",
+      "label": "Anything blocking you? (optional)",
+      "isMultiline": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Submit",
+      "data": {
+        "action": "submitTop3"
+      }
+    }
+  ]
+}
