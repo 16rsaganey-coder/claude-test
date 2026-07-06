@@ -66,6 +66,9 @@ Power Automate → **Create** → **Scheduled cloud flow**.
 
 **Step A — Get responses**
 Add action **Forms: List responses** → select the `Weekly Top 3` form.
+This only returns metadata per response (Response Id, submitter, submit
+date) — not the actual answers, so you can't build the digest from this
+action alone. Step C pulls the real answers.
 
 **Step B — Filter to this week's responses**
 Forms doesn't let you filter server-side, so add a **Filter array**:
@@ -75,18 +78,31 @@ Forms doesn't let you filter server-side, so add a **Filter array**:
   item()?['submitDate'] is greater than formatDateTime(addDays(utcNow(), -7), 'yyyy-MM-dd')
   ```
 
-**Step C — Build the digest body**
-Add **Apply to each** over the filtered array, then inside it add
-**Append to string variable** (`Digest`, initialized above the loop as empty
-string):
+**Step C — Get each response's answers**
+Add **Apply to each** over the filtered array from Step B. Inside the
+loop, add **Forms: Get response details**:
+- Form Id: same `Weekly Top 3` form as Step A
+- Response Id: click into the field and pick the **Response Id** token
+  from the dynamic content list (it comes from the current loop item —
+  under the hood this is `item()?['Response Id']`). Don't type this by
+  hand; it has to be the token from the loop.
+
+This is a second, separate call per response — `List responses` gives you
+the IDs to loop over, `Get response details` gives you the actual question
+answers for one response at a time. Once it's added, the dynamic content
+picker will offer your real question text ("Name", "Top 3 this week",
+"Anything blocking you?") as outputs of this action.
+
+**Step D — Build the digest body**
+Still inside the loop, add **Append to string variable** (`Digest`,
+initialized above the loop as an empty string), using the dynamic content
+from **Get response details** (Step C), not from Step A:
 ```
 <b><name></b><br/>
 <Top 3 this week, with line breaks preserved><br/><br/>
 ```
-Use dynamic content from the Forms response fields for `<name>` and the
-Top 3 answer.
 
-**Step D — Send the digest**
+**Step E — Send the digest**
 After the loop, add **Send an email (V2)**:
 - To: CIO's email
 - Subject: `Weekly Top 3 — Team Digest (@{formatDateTime(utcNow(),'MMM d')})`
